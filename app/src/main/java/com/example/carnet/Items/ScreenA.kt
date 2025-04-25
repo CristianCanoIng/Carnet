@@ -19,7 +19,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.ui.geometry.Offset
+import kotlin.random.Random
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +34,7 @@ fun ScreenA(navController: NavController, mascotaList: MutableList<Mascota>) {
     var fotoUrl by rememberSaveable { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        DistortedBackground()
+        ShootingStarsBackground()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -45,16 +47,16 @@ fun ScreenA(navController: NavController, mascotaList: MutableList<Mascota>) {
                     withStyle(style = SpanStyle(color = Color.White)) {
                         append("Identificación ")
                     }
-                    withStyle(style = SpanStyle(color = Color(0xFFD50651))) {
+                    withStyle(style = SpanStyle(color = Color(0xFF25D506))) {
                         append("Mascota")
                     }
                 },
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Cursive
+                fontFamily = FontFamily.Monospace
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(60.dp))
 
             val campos = listOf(
                 "Nombre" to nombre,
@@ -134,37 +136,46 @@ fun ScreenA(navController: NavController, mascotaList: MutableList<Mascota>) {
 }
 
 @Composable
-fun DistortedBackground() {
+fun ShootingStarsBackground() {
     val infiniteTransition = rememberInfiniteTransition()
-    val offsetAnim by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 800f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 15000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
+    val stars = remember { List(20) { Offset(Random.nextFloat(), Random.nextFloat()) } }
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawRect(color = Color.Black)
-
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(Color.Red.copy(alpha = 0.6f), Color.Transparent),
-                radius = 600f
-            ),
-            center = Offset(offsetAnim, offsetAnim),
-            radius = 500f
-        )
-
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(Color.Red.copy(alpha = 0.3f), Color.Transparent),
-                radius = 500f
-            ),
-            center = Offset(size.width - offsetAnim, size.height - offsetAnim),
-            radius = 400f
+    val starAnimations = stars.map {
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1500f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = (5000..10000).random(),
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Restart
+            )
         )
     }
-}
 
+    Canvas(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        val width = size.width
+        val height = size.height
+
+        stars.forEachIndexed { index, startOffset ->
+            val offsetAnim = starAnimations[index].value
+
+            val startX = startOffset.x * width
+            val startY = startOffset.y * height
+            val endX = startX + offsetAnim / 2
+            val endY = startY + offsetAnim / 2
+
+            drawLine(
+                brush = Brush.linearGradient(
+                    colors = listOf(Color.White, Color.Transparent),
+                    start = Offset(startX, startY),
+                    end = Offset(endX, endY)
+                ),
+                start = Offset(startX, startY),
+                end = Offset(endX, endY),
+                strokeWidth = 2f
+            )
+        }
+    }
+}

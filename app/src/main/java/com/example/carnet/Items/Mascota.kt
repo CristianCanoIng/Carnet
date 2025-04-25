@@ -1,9 +1,9 @@
 package com.example.carnet.Items
 
 data class Mascota(
-    val nombre: String,
-    val raza: String,
-    val tamaño: String,
-    val edad: String,
+    var nombre: String,
+    var raza: String,
+    var tamaño: String,
+    var edad: String,
     val fotoUrl: String
 )

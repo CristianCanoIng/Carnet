@@ -15,11 +15,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CarnetTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()){
-                    navigation()
-                }
-            }
+            navigation()
         }
     }
 }
